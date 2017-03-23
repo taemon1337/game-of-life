@@ -15,7 +15,7 @@
             <md-icon class="md-size-2x md-accent">{{ running ? 'pause' : 'play_arrow' }}</md-icon>
             <md-tooltip>{{ running ? 'Stop' : 'Start' }}</md-tooltip>
           </md-button>
-          <md-button class="md-raised" v-on:click.native="next">
+          <md-button class="md-raised" v-on:click.native="advance">
             <md-icon class="md-size-2x md-primary">skip_next</md-icon>
             <md-tooltip>Advance 1 cycle</md-tooltip>
           </md-button>
@@ -76,7 +76,7 @@ export default {
       count: 0,
       height: 100,
       width: 100,
-      blockSize: 5,
+      blockSize: 7,
       onColor: '#2ecc71',
       offColor: '#fff',
       strokeColor: '#f1c40f',
@@ -117,6 +117,11 @@ export default {
         this.running = true
         this.next()
       }
+    },
+    advance () {
+      this.running = true
+      this.next()
+      this.running = false
     },
     next () {
       if (this.worker && this.running) {
