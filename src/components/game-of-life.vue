@@ -2,66 +2,73 @@
   <div>
     <md-dialog-alert :md-content="alert" ref="dialog1"></md-dialog-alert>
 
+    <md-toolbar>
+      <div class="md-toolbar-container">
+        <md-button class="md-icon-button">
+          <md-icon>menu</md-icon>
+        </md-button>
+
+        <h2 class="md-title" style="flex: 1;">Conway's Game Of Life</h2>
+
+        <md-button class="md-icon-button" v-on:click.native="toggleRightSideNav">
+          <md-icon>filter_list</md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
+    <md-sidenav class="md-right" ref="rightSideNav">
+      <md-toolbar>
+        <div class="md-toolbar-container">
+          <h3 class="md-title">Patterns</h3>
+        </div>
+        <md-button class="md-raised" v-on:click.native="reset">
+          <md-icon class="md-size-2x md-primary">shuffle</md-icon>
+          <md-tooltip>Random seed</md-tooltip>
+        </md-button>
+        <md-button class="md-raised" v-on:click.native="acorn">
+          <md-icon class="md-size-2x md-primary">pregnant_woman</md-icon>
+          <md-tooltip>Acorn pattern</md-tooltip>
+        </md-button>
+        <md-button class="md-raised" v-on:click.native="liner">
+          <md-icon class="md-size-2x md-primary">new_releases</md-icon>
+          <md-tooltip>Line pattern</md-tooltip>
+        </md-button>
+        <md-button class="md-raised" v-on:click.native="liners">
+          <md-icon class="md-size-2x md-primary">call_split</md-icon>
+          <md-tooltip>Veritcal and Horizontal pattern</md-tooltip>
+        </md-button>
+        <md-button class="md-raised" v-on:click.native="spaceship">
+          <md-icon class="md-size-2x md-primary">local_shipping</md-icon>
+          <md-tooltip>Spaceship pattern</md-tooltip>
+        </md-button>
+        <md-button class="md-raised" v-on:click.native="infinit">
+          <md-icon class="md-size-2x md-primary">highlight</md-icon>
+          <md-tooltip>Ininit pattern</md-tooltip>
+        </md-button>
+        <md-button class="md-raised" v-on:click.native="staller">
+          <md-icon class="md-size-2x md-primary">pause</md-icon>
+          <md-tooltip>Stalled pattern</md-tooltip>
+        </md-button>
+      </md-toolbar>
+
+      <md-button class="md-raised md-accent" @click.native="closeRightSideNav">Close</md-button>
+    </md-sidenav>
+
     <md-layout md-gutter>
       <md-layout md-column md-gutter>
         <div id="game-of-life-container" v-bind:style="gridstyle"></div>
       </md-layout>
-
-      <md-layout md-column md-gutter>
-        <h3>Conway's Game Of Life</h3>
-
-        <md-toolbar class="md-transparent">
-          <md-button class="md-raised" v-on:click.native="startstop">
-            <md-icon class="md-size-2x md-accent">{{ running ? 'pause' : 'play_arrow' }}</md-icon>
-            <md-tooltip>{{ running ? 'Stop' : 'Start' }}</md-tooltip>
-          </md-button>
-          <md-button class="md-raised" v-on:click.native="advance">
-            <md-icon class="md-size-2x md-primary">skip_next</md-icon>
-            <md-tooltip>Advance 1 cycle</md-tooltip>
-          </md-button>
-          <md-button class="md-raised" v-on:click.native="jump">
-            <md-icon class="md-size-2x md-primary">forward_30</md-icon>
-            <md-tooltip>Advance {{ jumpcount }} cycles</md-tooltip>
-          </md-button>
-
-          <md-button class="md-raised">
-              <span>{{ count }}</span>
-            <md-tooltip>Cycle Count</md-tooltip>
-          </md-button>
-        </md-toolbar>
-
-        <md-toolbar class="md-transparent">
-          <md-button class="md-raised" v-on:click.native="reset">
-            <md-icon class="md-size-2x md-primary">shuffle</md-icon>
-            <md-tooltip>Random seed</md-tooltip>
-          </md-button>
-          <md-button class="md-raised" v-on:click.native="acorn">
-            <md-icon class="md-size-2x md-primary">pregnant_woman</md-icon>
-            <md-tooltip>Acorn pattern</md-tooltip>
-          </md-button>
-          <md-button class="md-raised" v-on:click.native="liner">
-            <md-icon class="md-size-2x md-primary">new_releases</md-icon>
-            <md-tooltip>Line pattern</md-tooltip>
-          </md-button>
-          <md-button class="md-raised" v-on:click.native="liners">
-            <md-icon class="md-size-2x md-primary">call_split</md-icon>
-            <md-tooltip>Veritcal and Horizontal pattern</md-tooltip>
-          </md-button>
-          <md-button class="md-raised" v-on:click.native="spaceship">
-            <md-icon class="md-size-2x md-primary">local_shipping</md-icon>
-            <md-tooltip>Spaceship pattern</md-tooltip>
-          </md-button>
-          <md-button class="md-raised" v-on:click.native="infinit">
-            <md-icon class="md-size-2x md-primary">highlight</md-icon>
-            <md-tooltip>Ininit pattern</md-tooltip>
-          </md-button>
-          <md-button class="md-raised" v-on:click.native="staller">
-            <md-icon class="md-size-2x md-primary">pause</md-icon>
-            <md-tooltip>Stalled pattern</md-tooltip>
-          </md-button>
-        </md-toolbar>
-      </md-layout>
     </md-layout>
+
+    <md-bottom-bar>
+      <md-bottom-bar-item v-show="!running" md-icon="play_arrow" v-on:click.native="startstop">Play</md-bottom-bar-item>
+      <md-bottom-bar-item v-show="!running" md-icon="skip_next" v-on:click.native="advance">Next</md-bottom-bar-item>
+      <md-bottom-bar-item v-show="!running" md-icon="forward_30" v-on:click.native="jump">Jump {{ jumpcount }}</md-bottom-bar-item>
+
+      <md-bottom-bar-item v-show="running" md-icon="pause" v-on:click.native="startstop">Pause</md-bottom-bar-item>
+
+      <md-bottom-bar-item md-icon="fiber_manual_record">{{ count }}</md-bottom-bar-item>
+    </md-bottom-bar>
   </div>
 </template>
 
@@ -133,6 +140,13 @@ export default {
         this.clear()
         this.worker.postMessage({ jump: this.jumpcount })
       }
+    },
+    toggleRightSideNav () {
+      console.log('Toggleing')
+      this.$refs.rightSideNav.toggle()
+    },
+    closeRightSideNav () {
+      this.$refs.rightSideNav.close()
     },
     infinit () {
       var self = this
@@ -221,6 +235,7 @@ export default {
     },
     reset (indata) {
       var self = this
+      self.closeRightSideNav()
       self.running = false
       self.count = 0
       self.clear()
