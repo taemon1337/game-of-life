@@ -43,8 +43,9 @@ var countLive = function(x, y) {
   return count
 }
 
-var next = function() {
+var next = function(silent) {
   var tmp = []
+  var stalled = true
 
   iterate(function (x, y) {
     var count = countLive(x, y)
@@ -59,13 +60,25 @@ var next = function() {
 
   iterate(function (x, y) {
     if (tmp.indexOf([x, y].join(':')) >= 0) {
+      if (!is_alive(x, y)) {
+        stalled = false
+      }
       data[x][y] = 1
-      self.postMessage({ on: true, x: x, y: y })
+      if (!silent) {
+        self.postMessage({ on: true, x: x, y: y })
+      }
     } else if(is_alive(x, y)) {
+      stalled = false
       data[x][y] = 0
-      self.postMessage({ off: true, x: x, y: y })
+      if (!silent) {
+        self.postMessage({ off: true, x: x, y: y })
+      }
     }
   })
+
+  if (stalled) {
+    self.postMessage({ stall: true })
+  }
 }
 
 self.addEventListener('message', function(e) {
@@ -94,6 +107,13 @@ self.addEventListener('message', function(e) {
     }
   }
   if(e.data.next) {
+    next()
+  }
+  if(e.data.jump) {
+    var c = parseInt(e.data.jump)
+    for (var i = 0; i < c - 1; i += 1) {
+      next(true)
+    }
     next()
   }
 }, false)
