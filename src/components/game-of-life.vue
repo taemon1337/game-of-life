@@ -1,11 +1,6 @@
 <template>
   <div>
-    <md-dialog-alert
-      v-if="alert"
-      :md-content="alert.content"
-      :md-ok-text="alert.ok"
-      ref="dialog1">
-    </md-dialog-alert>
+    <md-dialog-alert :md-content="alert" ref="dialog1"></md-dialog-alert>
 
     <md-layout md-gutter>
       <md-layout md-column md-gutter>
@@ -76,7 +71,7 @@ import Raphael from 'raphael'
 export default {
   data () {
     return {
-      alert: null,
+      alert: ' ',
       running: false,
       count: 0,
       height: 100,
@@ -93,18 +88,6 @@ export default {
   },
   props: [],
   methods: {
-    loop () {
-      var self = this
-      if (self.running) {
-        setTimeout(function () {
-          self.count += 1
-          self.next()
-          self.loop()
-        }, self.step)
-      } else {
-        console.log('STOPPED')
-      }
-    },
     iterate (cb) {
       var self = this
       for (var x = 0; x <= self.height; x += 1) {
@@ -132,20 +115,18 @@ export default {
         this.running = false
       } else {
         this.running = true
-        this.loop()
+        this.next()
       }
     },
     next () {
-      if (this.worker) {
+      if (this.worker && this.running) {
         this.worker.postMessage({ next: true })
-        this.count += 1
       }
     },
     jump () {
       if (this.worker) {
         this.clear()
         this.worker.postMessage({ jump: this.jumpcount })
-        this.count += this.jumpcount
       }
     },
     infinit () {
@@ -274,8 +255,9 @@ export default {
 
     self.worker.addEventListener('message', function (e) {
       if (e.data.stall) {
+        console.log('STALLED')
         self.running = false
-        self.alert = { content: 'The Game of Life has stalled!', ok: 'Close' }
+        self.alert = 'The Game of Life has stalled!'
         self.$refs['dialog1'].open()
       }
       if (e.data.on || e.data.off) {
@@ -286,6 +268,10 @@ export default {
         } else {
           self.data[x][y].attr('fill', self.offColor)
         }
+      }
+      if (e.data.next) {
+        self.count += 1
+        self.next()
       }
     })
   },

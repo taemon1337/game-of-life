@@ -44,40 +44,46 @@ var countLive = function(x, y) {
 }
 
 var next = function(silent) {
-  var tmp = []
-  var stalled = true
+  try {
+    var tmp = []
+    var stalled = true
 
-  iterate(function (x, y) {
-    var count = countLive(x, y)
-    var livecell = is_alive(x, y)
+    iterate(function (x, y) {
+      var count = countLive(x, y)
+      var livecell = is_alive(x, y)
 
-    if(livecell && [2,3].indexOf(count) >= 0) {
-      tmp.push([x, y].join(':'))
-    } else if(!livecell && count === 3) {
-      tmp.push([x, y].join(':'))
-    }
-  })
+      if(livecell && [2,3].indexOf(count) >= 0) {
+        tmp.push([x, y].join(':'))
+      } else if(!livecell && count === 3) {
+        tmp.push([x, y].join(':'))
+      }
+    })
 
-  iterate(function (x, y) {
-    if (tmp.indexOf([x, y].join(':')) >= 0) {
-      if (!is_alive(x, y)) {
+    iterate(function (x, y) {
+      if (tmp.indexOf([x, y].join(':')) >= 0) {
+        if (!is_alive(x, y)) {
+          stalled = false
+        }
+        data[x][y] = 1
+        if (!silent) {
+          self.postMessage({ on: true, x: x, y: y })
+        }
+      } else if(is_alive(x, y)) {
         stalled = false
+        data[x][y] = 0
+        if (!silent) {
+          self.postMessage({ off: true, x: x, y: y })
+        }
       }
-      data[x][y] = 1
-      if (!silent) {
-        self.postMessage({ on: true, x: x, y: y })
-      }
-    } else if(is_alive(x, y)) {
-      stalled = false
-      data[x][y] = 0
-      if (!silent) {
-        self.postMessage({ off: true, x: x, y: y })
-      }
-    }
-  })
+    })
 
-  if (stalled) {
-    self.postMessage({ stall: true })
+    self.postMessage({ 'next': true })
+
+    if (stalled) {
+      self.postMessage({ stall: true })
+    }
+  } catch(err) {
+    console.log('ERROR: ', err)
   }
 }
 
