@@ -246,7 +246,7 @@ export default {
   },
   mounted () {
     var self = this
-    self.worker = new Worker('/static/game-of-life-worker.js')
+    self.worker = new Worker('./static/game-of-life-worker.js')
     self.paper = Raphael('game-of-life-container', self.width * self.blockSize, self.height * self.blockSize)
     self.paper.rect(0, 0, self.width * self.blockSize, self.height * self.blockSize)
 
