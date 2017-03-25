@@ -1,7 +1,5 @@
 <template>
   <div>
-    <md-dialog-alert :md-content="alert" ref="dialog1"></md-dialog-alert>
-
     <md-toolbar>
       <div class="md-toolbar-container">
         <md-button class="md-icon-button">
@@ -10,45 +8,46 @@
 
         <h2 class="md-title" style="flex: 1;">Conway's Game Of Life</h2>
 
-        <md-button class="md-icon-button" v-on:click.native="toggleRightSideNav">
+        <md-button v-on:click.native="toggleRightSideNav">
+          Patterns
           <md-icon>filter_list</md-icon>
         </md-button>
       </div>
     </md-toolbar>
 
-    <md-sidenav class="md-right" ref="rightSideNav">
+    <md-dialog-alert :md-content="alert" ref="dialog1"></md-dialog-alert>
+
+    <md-sidenav md-swipe-distance="300" class="md-right" ref="rightSideNav">
       <md-toolbar>
         <div class="md-toolbar-container">
           <h3 class="md-title">Patterns</h3>
         </div>
-        <md-button class="md-raised" v-on:click.native="reset">
-          <md-icon class="md-size-2x md-primary">shuffle</md-icon>
-          <md-tooltip>Random seed</md-tooltip>
-        </md-button>
-        <md-button class="md-raised" v-on:click.native="acorn">
-          <md-icon class="md-size-2x md-primary">pregnant_woman</md-icon>
-          <md-tooltip>Acorn pattern</md-tooltip>
-        </md-button>
-        <md-button class="md-raised" v-on:click.native="liner">
-          <md-icon class="md-size-2x md-primary">new_releases</md-icon>
-          <md-tooltip>Line pattern</md-tooltip>
-        </md-button>
-        <md-button class="md-raised" v-on:click.native="liners">
-          <md-icon class="md-size-2x md-primary">call_split</md-icon>
-          <md-tooltip>Veritcal and Horizontal pattern</md-tooltip>
-        </md-button>
-        <md-button class="md-raised" v-on:click.native="spaceship">
-          <md-icon class="md-size-2x md-primary">local_shipping</md-icon>
-          <md-tooltip>Spaceship pattern</md-tooltip>
-        </md-button>
-        <md-button class="md-raised" v-on:click.native="infinit">
-          <md-icon class="md-size-2x md-primary">highlight</md-icon>
-          <md-tooltip>Ininit pattern</md-tooltip>
-        </md-button>
-        <md-button class="md-raised" v-on:click.native="staller">
-          <md-icon class="md-size-2x md-primary">pause</md-icon>
-          <md-tooltip>Stalled pattern</md-tooltip>
-        </md-button>
+        <md-list>
+          <md-list-item>
+            <md-button class="md-raised" v-on:click.native="loadseed('stillsandoscillators')">Basic Patterns</md-button>
+          </md-list-item>
+          <md-list-item>
+            <md-button class="md-raised" v-on:click.native="loadseed('glidergun')">Glider Gun</md-button>
+          </md-list-item>
+          <md-list-item>
+            <md-button class="md-raised" v-on:click.native="loadseed('acorn')">Acorn</md-button>
+          </md-list-item>
+          <md-list-item>
+            <md-button class="md-raised" v-on:click.native="loadseed('xline')">Horizontal Line</md-button>
+          </md-list-item>
+          <md-list-item>
+            <md-button class="md-raised" v-on:click.native="loadseed('xyline')">Crossing Lines</md-button>
+          </md-list-item>
+          <md-list-item>
+            <md-button class="md-raised" v-on:click.native="loadseed('spaceship')">Spaceship</md-button>
+          </md-list-item>
+          <md-list-item>
+            <md-button class="md-raised" v-on:click.native="loadseed('inifinit')">Infinit</md-button>
+          </md-list-item>
+          <md-list-item>
+            <md-button class="md-raised" v-on:click.native="loadseed('random')">Totes Random</md-button>
+          </md-list-item>
+        </md-list>
       </md-toolbar>
 
       <md-button class="md-raised md-accent" @click.native="closeRightSideNav">Close</md-button>
@@ -74,6 +73,7 @@
 
 <script>
 import Raphael from 'raphael'
+import Seeds from '../../static/game-of-life-seeds'
 
 export default {
   data () {
@@ -118,11 +118,12 @@ export default {
       })
     },
     startstop () {
-      if (this.running) {
-        this.running = false
+      var self = this
+      if (self.running) {
+        self.running = false
       } else {
-        this.running = true
-        this.next()
+        self.running = true
+        self.next()
       }
     },
     advance () {
@@ -148,90 +149,10 @@ export default {
     closeRightSideNav () {
       this.$refs.rightSideNav.close()
     },
-    infinit () {
+    loadseed (name) {
       var self = this
-      var x = Math.floor(self.height / 2)
-      var y = Math.floor(self.width / 2)
-      var seed = [
-        [x, y].join(','),
-        [x + 1, y].join(','),
-        [x + 2, y].join(','),
-        [x + 4, y].join(','),
-        [x, y + 1].join(','),
-        [x + 3, y + 2].join(','),
-        [x + 4, y + 2].join(','),
-        [x + 1, y + 3].join(','),
-        [x + 2, y + 3].join(','),
-        [x + 4, y + 3].join(','),
-        [x, y + 4].join(','),
-        [x + 2, y + 4].join(','),
-        [x + 4, y + 4].join(',')
-      ]
-
+      var seed = Seeds[name](self).map(function (xy) { return xy.join(',') })
       self.reset(seed)
-    },
-    liner () {
-      var self = this
-      var y = Math.floor(self.width / 2)
-      var seed = []
-
-      for (var x = 0; x < self.height; x += 1) {
-        seed.push([x, y].join(','))
-      }
-
-      self.reset(seed)
-    },
-    liners () {
-      var self = this
-      var y = Math.floor(self.width / 2)
-      var seed = []
-
-      for (var x = 0; x < self.height; x += 1) {
-        seed.push([x, y].join(','))
-      }
-
-      x = Math.floor(self.height / 2)
-
-      for (y = 0; y < self.width; y += 1) {
-        seed.push([x, y].join(','))
-      }
-
-      self.reset(seed)
-    },
-    acorn () {
-      var self = this
-      var startx = Math.floor(self.height / 2)
-      var starty = Math.floor(self.width / 2)
-      var seed = [
-        [startx, starty].join(','),
-        [startx + 1, starty].join(','),
-        [startx + 1, starty - 2].join(','),
-        [startx + 3, starty - 1].join(','),
-        [startx + 4, starty].join(','),
-        [startx + 5, starty].join(','),
-        [startx + 6, starty].join(',')
-      ]
-      self.reset(seed)
-    },
-    spaceship () {
-      var self = this
-      var x = 0
-      var y = Math.floor(self.width / 2)
-      var seed = [
-        [x, y].join(','),
-        [x + 3, y].join(','),
-        [x + 4, y + 1].join(','),
-        [x, y + 2].join(','),
-        [x + 4, y + 2].join(','),
-        [x + 1, y + 3].join(','),
-        [x + 2, y + 3].join(','),
-        [x + 3, y + 3].join(','),
-        [x + 4, y + 3].join(',')
-      ]
-      self.reset(seed)
-    },
-    staller () {
-      this.reset(['5,5', '5,6', '6,5', '6,6'])
     },
     reset (indata) {
       var self = this
@@ -247,16 +168,6 @@ export default {
           self.worker.postMessage({ data: self.initdata })
         }, 1000)
       }
-    },
-    getrandom () {
-      var self = this
-      var count = Math.floor(self.height * self.width / self.initDivisor)
-      var rand = []
-
-      for (var i = 0; i < count; i += 1) {
-        rand.push([Math.floor(Math.random() * self.height), Math.floor(Math.random() * self.width)].join(','))
-      }
-      return rand
     }
   },
   mounted () {
