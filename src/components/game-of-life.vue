@@ -2,7 +2,7 @@
   <div>
     <md-toolbar>
       <div class="md-toolbar-container">
-        <md-button class="md-icon-button">
+        <md-button class="md-icon-button" v-on:click.native="toggleLeftSideNav">
           <md-icon>menu</md-icon>
         </md-button>
 
@@ -16,6 +16,36 @@
     </md-toolbar>
 
     <md-dialog-alert :md-content="alert" ref="dialog1"></md-dialog-alert>
+
+    <md-sidenav md-swipe-distance="300" class="md-left" ref="leftSideNav">
+      <div style="padding:15px;">
+        <h3 class="md-title">Game Settings</h3>
+
+        <form @submit.stop.prevent="saveSettings" ref="settingsForm">
+          <md-input-container>
+            <label>Game Height</label>
+            <md-input name="height" :value="height"></md-input>
+          </md-input-container>
+          <md-input-container>
+            <label>Game Width</label>
+            <md-input name="width" :value="width"></md-input>
+          </md-input-container>
+          <md-input-container>
+            <label>Block Size</label>
+            <md-input name="blockSize" :value="blockSize"></md-input>
+          </md-input-container>
+          <md-input-container>
+            <label>Delay Time</label>
+            <md-input name="step" v-model="step"></md-input>
+          </md-input-container>
+
+          <vue-range-slider></vue-range-slider>
+
+          <md-button class="md-raised md-primary" type="submit">Save</md-button>
+          <md-button class="md-raised md-warn" type="button" @click.native="resetSettings">Cancel</md-button>
+        </form>
+      </div>
+    </md-sidenav>
 
     <md-sidenav md-swipe-distance="300" class="md-right" ref="rightSideNav">
       <md-toolbar>
@@ -50,7 +80,7 @@
         </md-list>
       </md-toolbar>
 
-      <md-button class="md-raised md-accent" @click.native="closeRightSideNav">Close</md-button>
+      <md-button class="md-raised md-warn" @click.native="closeRightSideNav">Close</md-button>
     </md-sidenav>
 
     <md-layout md-gutter>
@@ -74,6 +104,7 @@
 <script>
 import Raphael from 'raphael'
 import Seeds from '../../static/game-of-life-seeds'
+import RangeSlider from '@/components/vue-range-slider'
 
 export default {
   data () {
@@ -87,7 +118,7 @@ export default {
       onColor: '#2ecc71',
       offColor: '#fff',
       strokeColor: '#f1c40f',
-      step: 200,
+      step: 0,
       jumpcount: 30,
       initDivisor: 5,
       status: ''
@@ -143,11 +174,21 @@ export default {
       }
     },
     toggleRightSideNav () {
-      console.log('Toggleing')
       this.$refs.rightSideNav.toggle()
     },
     closeRightSideNav () {
       this.$refs.rightSideNav.close()
+    },
+    toggleLeftSideNav () {
+      this.$refs.leftSideNav.toggle()
+    },
+    closeLeftSideNav () {
+      this.$refs.leftSideNav.close()
+    },
+    resetSettings () {
+      this.$refs.leftSideNav.close()
+    },
+    saveSettings () {
     },
     loadseed (name) {
       var self = this
@@ -202,7 +243,11 @@ export default {
       }
       if (e.data.next) {
         self.count += 1
-        self.next()
+        if (self.step) {
+          setTimeout(function () { self.next() }, self.step)
+        } else {
+          self.next()
+        }
       }
     })
   },
@@ -210,6 +255,9 @@ export default {
     gridstyle () {
       return { height: this.height * this.blockSize, width: this.width * this.blockSize, margin: this.blockSize + 'px' }
     }
+  },
+  components: {
+    RangeSlider
   }
 }
 </script>
